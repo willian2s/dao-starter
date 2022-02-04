@@ -7,16 +7,16 @@ const tokenModule = sdk.getTokenModule(REACT_APP_TOKEN_ADDRESS);
 
 (async () => {
   try {
-    const walletAddress = await bundleDropModule.getAllClaimerAddresses("0");
+    const walletAddresses = await bundleDropModule.getAllClaimerAddresses("0");
 
-    if (walletAddress.length === 0) {
+    if (walletAddresses.length === 0) {
       console.log(
         "No NFTs have been claimed yet, maybe get some friends to claim your free NFTs!"
       );
       process.exit(0);
     }
 
-    const airdropTargets = walletAddress.map((address) => {
+    const airdropTargets = walletAddresses.map((address) => {
       const randomAmount = Math.floor(
         Math.random() * (10000 - 1000 + 1) + 1000
       );
