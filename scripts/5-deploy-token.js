@@ -1,5 +1,8 @@
 import sdk from "./1-initialize-sdk.js";
 
+import dotenv from "dotenv";
+dotenv.config();
+
 const { REACT_APP_ADDRESS_APP } = process.env;
 const app = sdk.getAppModule(REACT_APP_ADDRESS_APP);
 

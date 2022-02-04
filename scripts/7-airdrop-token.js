@@ -1,6 +1,9 @@
 import { ethers } from "ethers";
 import sdk from "./1-initialize-sdk.js";
 
+import dotenv from "dotenv";
+dotenv.config();
+
 const { REACT_APP_BUNDLE_DROP_ADDRESS, REACT_APP_TOKEN_ADDRESS } = process.env;
 const bundleDropModule = sdk.getBundleDropModule(REACT_APP_BUNDLE_DROP_ADDRESS);
 const tokenModule = sdk.getTokenModule(REACT_APP_TOKEN_ADDRESS);
