@@ -11,7 +11,7 @@ const bundleDrop = sdk.getBundleDropModule(REACT_APP_BUNDLE_DROP_ADDRESS);
   try {
     await bundleDrop.createBatch([
       {
-        name: "Three Rubik Cube",
+        name: "Three Rubik Cube Starter",
         description: "Chain of cube",
         image: readFileSync("scripts/assets/rubiks-cube.png"),
       },

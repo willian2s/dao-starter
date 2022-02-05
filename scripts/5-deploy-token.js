@@ -10,7 +10,7 @@ const app = sdk.getAppModule(REACT_APP_ADDRESS_APP);
   try {
     const tokenModule = await app.deployTokenModule({
       name: "Starter Governance Token",
-      symbol: "STR",
+      symbol: "STT",
       description: "This is the governance token developed for DAO Starter",
     });
     console.log(

@@ -1,17 +1,21 @@
-import { ethers } from "ethers";
 import { useWeb3 } from "@3rdweb/hooks";
 import { ThirdwebSDK } from "@3rdweb/sdk";
-import { useEffect, useMemo, useState } from "react";
+import { UnsupportedChainIdError } from "@web3-react/core";
+import { useEffect, useState } from "react";
+import { MemberList } from "./components/MemberList";
+import { VoteForm } from "./components/VoteForm";
 
 const {
   REACT_APP_BUNDLE_DROP_ADDRESS,
   REACT_APP_TOKEN_ADDRESS,
   REACT_APP_NETWORK,
+  REACT_APP_VOTE_ADDRESS,
 } = process.env;
 
 const sdk = new ThirdwebSDK(REACT_APP_NETWORK);
 const bundleDropModule = sdk.getBundleDropModule(REACT_APP_BUNDLE_DROP_ADDRESS);
 const tokenModule = sdk.getTokenModule(REACT_APP_TOKEN_ADDRESS);
+const voteModule = sdk.getVoteModule(REACT_APP_VOTE_ADDRESS);
 
 const App = () => {
   const { connectWallet, address, error, provider } = useWeb3();
@@ -23,10 +27,8 @@ const App = () => {
   const [isClaiming, setIsClaiming] = useState(false);
   const [memberTokenAmounts, setMemberTokenAmounts] = useState({});
   const [memberAddresses, setMemberAddresses] = useState([]);
-
-  const shortenAddress = (str) => {
-    return `${str.substring(0, 6)}...${str.substring(str.length - 4)}`;
-  };
+  const [proposals, setProposals] = useState([]);
+  const [hasVoted, setHasVoted] = useState(false);
 
   const mintNFT = async () => {
     setIsClaiming(true);
@@ -103,17 +105,60 @@ const App = () => {
     })();
   }, [hasClaimedNFT]);
 
-  const memberList = useMemo(() => {
-    return memberAddresses.map((address) => {
-      return {
-        address,
-        tokenAmount: ethers.utils.formatUnits(
-          memberTokenAmounts[address] || 0,
-          18
-        ),
-      };
-    });
-  }, [memberAddresses, memberTokenAmounts]);
+  useEffect(() => {
+    if (!hasClaimedNFT) {
+      return;
+    }
+
+    (async () => {
+      try {
+        const proposals = await voteModule.getAll();
+        setProposals(proposals);
+        console.log("🌈 Proposals: ", proposals);
+      } catch (error) {
+        console.error("failed to get proposals", error);
+      }
+    })();
+  }, [hasClaimedNFT]);
+
+  useEffect(() => {
+    if (!hasClaimedNFT) {
+      return;
+    }
+
+    if (!proposals.length) {
+      return;
+    }
+
+    (async () => {
+      try {
+        const hasVoted = await voteModule.hasVoted(
+          proposals[0].proposalId,
+          address
+        );
+        setHasVoted(hasVoted);
+        if (hasVoted) {
+          console.log("🥵 User has already voted");
+        } else {
+          console.log("🙂 User has not voted yet");
+        }
+      } catch (error) {
+        console.error("failed to check if wallet has voted", error);
+      }
+    })();
+  }, [hasClaimedNFT, proposals, address]);
+
+  if (error instanceof UnsupportedChainIdError) {
+    return (
+      <div className="unsupported-network">
+        <h2>Please connect to Rinkeby</h2>
+        <p>
+          This dapp only works on the Rinkeby network, please switch networks in
+          your connected wallet.
+        </p>
+      </div>
+    );
+  }
 
   if (!address) {
     return (
@@ -130,29 +175,17 @@ const App = () => {
     return (
       <div className="member-page">
         <h1>Starter Member Page</h1>
-        <p>Congratulations on being a member</p>
         <div>
-          <div>
-            <h2>Member List</h2>
-            <table className="card">
-              <thead>
-                <tr>
-                  <th>Address</th>
-                  <th>Token Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {memberList.map((member) => {
-                  return (
-                    <tr key={member.address}>
-                      <td>{shortenAddress(member.address)}</td>
-                      <td>{member.tokenAmount}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <MemberList
+            memberAddresses={memberAddresses}
+            memberTokenAmounts={memberTokenAmounts}
+          />
+          <VoteForm
+            hasVoted={hasVoted}
+            setHasVoted={setHasVoted}
+            address={address}
+            proposals={proposals}
+          />
         </div>
       </div>
     );

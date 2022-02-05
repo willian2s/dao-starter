@@ -11,7 +11,7 @@ const appModule = sdk.getAppModule(REACT_APP_ADDRESS_APP);
     const voteModule = await appModule.deployVoteModule({
       name: "StartersDAO's Proposals",
       votingTokenAddress: REACT_APP_TOKEN_ADDRESS,
-      proposalStartWaitTimeInSeconds: 24 * 60 * 60,
+      proposalStartWaitTimeInSeconds: 0,
       proposalVotingTimeInSeconds: 168 * 60 * 60,
       votingQuorumFraction: 0,
       minimumNumberOfTokensNeededToPropose: "0",
